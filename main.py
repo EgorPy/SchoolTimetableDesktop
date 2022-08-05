@@ -1,5 +1,7 @@
 __author__ = "Egor Mironov @ved3v"
 
+import locale
+
 """
 
 This is a School Timetable Desktop Project.
@@ -15,11 +17,72 @@ import tkinter.ttk
 import tkinter.messagebox
 import tkinter.filedialog
 import tkinter.font
+import ctypes
+import pickle
 
 
 class App:
-    def initMainPage(self):
+    def askFileToSave(self):
         pass
+
+    def askExit(self):
+        # TODO: Complete this function
+        self.exitProgram()
+        # if self.changesMade:
+        #     answer = tkinter.messagebox.askyesnocancel("Save changes", "Save changes?")
+        #     if answer == True:
+        #         self.askFileToSave()
+        #     elif answer == False:
+        #         self.exitProgram()
+        # else:
+        #     self.exitProgram()
+
+    def exitProgram(self):
+        # update first launch variable
+        self.FIRST_LAUNCH = False
+
+        # save first launch variable
+        with open("savedData/firstLaunch.dat", "wb") as file:
+            pickle.dump(self.FIRST_LAUNCH, file)
+
+        self.root.destroy()
+
+    def saveTimetable(self):
+        pass
+
+    def openTimetable(self):
+        pass
+
+    def openRecentTimetable(self):
+        pass
+
+    def createNewTimetable(self):
+        pass
+
+    def initMainPage(self):
+        # menu
+
+        # create menu
+        self.mainMenu = tkinter.Menu(self.root)
+
+        # config root to use menu
+        self.root.config(menu=self.mainMenu)
+
+        # add File button to menu
+        self.fileMenu = tkinter.Menu(self.mainMenu, tearoff=False, background=self.mainColor)
+        self.mainMenu.add_cascade(label="File", menu=self.fileMenu)
+
+        self.fileMenu.add_command(label="New", command=self.createNewTimetable, background=self.mainColor)
+        self.fileMenu.add_command(label="Open Recent", command=self.openRecentTimetable, background=self.mainColor)
+        self.fileMenu.add_command(label="Open...", command=self.openTimetable, background=self.mainColor)
+        self.fileMenu.add_command(label="Save", command=self.saveTimetable, background=self.mainColor)
+        self.fileMenu.add_separator()
+        self.fileMenu.add_command(label="Exit", command=self.exitProgram, background=self.mainColor)
+
+        # TODO: add Edit button to menu
+
+        # welcome page
+        # TODO: add welcome page
 
     def packMainPage(self):
         pass
@@ -61,6 +124,15 @@ class App:
         self.packMainPage()
 
     def config(self):
+        # general
+
+        # load first launch variable
+        try:
+            with open("savedData/firstLaunch.dat", "rb") as file:
+                self.FIRST_LAUNCH = pickle.load(file)
+        except FileNotFoundError:
+            self.FIRST_LAUNCH = True
+
         # colors
         self.mainColor = "#FFFFFF"
 
@@ -81,9 +153,10 @@ class App:
         self.titleFont = tkinter.font.Font(family="Helvetica", size=self.WIDTH // 60, weight="bold")
 
         # styles
-        self.mainStyle = tkinter.ttk.Style()
-        self.mainStyle.theme_use("vista")
-        self.mainStyle.configure("TButton", padding=0, background=self.mainColor, width=100)
+        # self.mainStyle = tkinter.ttk.Style()
+        # print(self.mainStyle.theme_names())
+        # self.mainStyle.theme_use("winnative")
+        # self.mainStyle.configure("TButton", padding=0, background=self.mainColor, width=10)
 
     def rootConfig(self):
         self.WIDTH = self.root.winfo_screenwidth()
@@ -101,6 +174,8 @@ class App:
 
         self.config()
 
+        self.root.config(bg=self.mainColor)
+
         """
         
         Page names:
@@ -112,7 +187,16 @@ class App:
         
         """
 
+        # get OS language
+        windll = ctypes.windll.kernel32
+        self.LANGUAGE = locale.windows_locale[windll.GetUserDefaultUILanguage()] # format: en_US
+
         self.mainPage()
+
+        # root events
+
+        # handling close event
+        self.root.protocol("WM_DELETE_WINDOW", self.askExit)
 
         self.root.mainloop()
 
