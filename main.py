@@ -1,7 +1,5 @@
 __author__ = "Egor Mironov @ved3v"
 
-import locale
-
 """
 
 This is a School Timetable Desktop Project.
@@ -19,6 +17,8 @@ import tkinter.filedialog
 import tkinter.font
 import ctypes
 import pickle
+import locale
+from ctypes import windll
 
 
 class App:
@@ -56,7 +56,7 @@ class App:
     def openRecentTimetable(self):
         pass
 
-    def createNewTimetable(self):
+    def createTimetable(self):
         pass
 
     def initMainPage(self):
@@ -69,23 +69,41 @@ class App:
         self.root.config(menu=self.mainMenu)
 
         # add File button to menu
-        self.fileMenu = tkinter.Menu(self.mainMenu, tearoff=False, background=self.mainColor)
+        self.fileMenu = tkinter.Menu(self.mainMenu, tearoff=False)
         self.mainMenu.add_cascade(label="File", menu=self.fileMenu)
 
-        self.fileMenu.add_command(label="New", command=self.createNewTimetable, background=self.mainColor)
-        self.fileMenu.add_command(label="Open Recent", command=self.openRecentTimetable, background=self.mainColor)
-        self.fileMenu.add_command(label="Open...", command=self.openTimetable, background=self.mainColor)
-        self.fileMenu.add_command(label="Save", command=self.saveTimetable, background=self.mainColor)
+        self.fileMenu.add_command(label="New", command=self.createTimetable, activebackground=self.sectionBackgroundColor)
+        self.fileMenu.add_command(label="Open Recent", command=self.openRecentTimetable, activebackground=self.sectionBackgroundColor)
+        self.fileMenu.add_command(label="Open...", command=self.openTimetable, activebackground=self.sectionBackgroundColor)
+        self.fileMenu.add_command(label="Save", command=self.saveTimetable, activebackground=self.sectionBackgroundColor)
         self.fileMenu.add_separator()
-        self.fileMenu.add_command(label="Exit", command=self.exitProgram, background=self.mainColor)
+        self.fileMenu.add_command(label="Exit", command=self.exitProgram, activebackground=self.sectionBackgroundColor)
 
         # TODO: add Edit button to menu
 
         # welcome page
         # TODO: add welcome page
 
+        self.welcomePageFrame = tkinter.Frame(self.root, background=self.mainColor)
+        self.mainPageTitleLabel = tkinter.Label(self.welcomePageFrame, text="School Timetable Desktop", background=self.mainColor, font=self.titleFont)
+        self.welcomePageLabel = tkinter.Label(self.welcomePageFrame, text="Welcome Page", background=self.mainColor, font=self.subtitleFont)
+
+        self.timetablesFrame = tkinter.Frame(self.welcomePageFrame, background=self.mainColor)
+        self.mainPageStartLabel = tkinter.Label(self.timetablesFrame, text="Start", background=self.mainColor, font=self.bigFont)
+        self.createTimetableButton = tkinter.Button(self.timetablesFrame, text="New Timetable...", background=self.mainColor, activebackground=self.mainColor,
+                                                    foreground=self.buttonColor, activeforeground=self.buttonColor, font=self.mainFont, cursor="hand2", relief="flat", borderwidth=0)
+        self.openTimetableButton = tkinter.Button(self.timetablesFrame, text="Open Timetable...", background=self.mainColor, activebackground=self.mainColor,
+                                                  foreground=self.buttonColor, activeforeground=self.buttonColor, font=self.mainFont, cursor="hand2", relief="flat", borderwidth=0)
+
     def packMainPage(self):
-        pass
+        self.welcomePageFrame.pack(anchor="nw", padx=100, pady=100)
+        self.mainPageTitleLabel.pack(anchor="nw")
+        self.welcomePageLabel.pack(anchor="nw")
+
+        self.timetablesFrame.pack(anchor="nw", pady=50)
+        self.mainPageStartLabel.pack(anchor="nw")
+        self.createTimetableButton.pack(anchor="nw")
+        self.openTimetableButton.pack(anchor="nw")
 
     def unpackCreateNewTimetablePage(self):
         pass
@@ -148,15 +166,13 @@ class App:
         self.timetableClassroomColumnColor = "#FFFFFF"
 
         # fonts
-        self.mainFont = tkinter.font.Font(family="Helvetica", size=self.WIDTH // 100, weight="bold")
+        self.bigFont = tkinter.font.Font(family="Segoe UI", size=self.WIDTH // 70)
+        self.mainFont = tkinter.font.Font(family="Segoe UI", size=self.WIDTH // 100)
+        self.titleFont = tkinter.font.Font(family="Segoe UI", size=self.WIDTH // 40)
+        self.subtitleFont = tkinter.font.Font(family="Segoe UI", size=self.WIDTH // 60)
 
-        self.titleFont = tkinter.font.Font(family="Helvetica", size=self.WIDTH // 60, weight="bold")
-
-        # styles
-        # self.mainStyle = tkinter.ttk.Style()
-        # print(self.mainStyle.theme_names())
-        # self.mainStyle.theme_use("winnative")
-        # self.mainStyle.configure("TButton", padding=0, background=self.mainColor, width=10)
+        # images
+        self.createTimetableImage = tkinter.PhotoImage(file="images/createTimetable.png")
 
     def rootConfig(self):
         self.WIDTH = self.root.winfo_screenwidth()
@@ -164,6 +180,8 @@ class App:
         self.root.geometry(f"{self.WIDTH}x{self.HEIGHT}")
         self.root.state("zoomed")
         self.root.resizable(False, True)
+        # this line of code needed to get rid of blurred fonts (see https://stackoverflow.com/questions/41315873/attempting-to-resolve-blurred-tkinter-text-scaling-on-windows-10-high-dpi-disp)
+        windll.shcore.SetProcessDpiAwareness(1)
 
     def __init__(self):
         self.root = tkinter.Tk()
@@ -181,7 +199,7 @@ class App:
         Page names:
         
         main
-        create new timetable
+        create timetable
         settings
         guide
         
@@ -189,7 +207,7 @@ class App:
 
         # get OS language
         windll = ctypes.windll.kernel32
-        self.LANGUAGE = locale.windows_locale[windll.GetUserDefaultUILanguage()] # format: en_US
+        self.LANGUAGE = locale.windows_locale[windll.GetUserDefaultUILanguage()]  # format: en_US
 
         self.mainPage()
 
